@@ -24,6 +24,22 @@ percent_biology_df <- rbind(proportion_of_biology, proportion_of_biology_2018, p
 #convert year into factor
 percent_biology_df$year <- as.factor(percent_biology_df$year)
 
-ggplot(percent_biology_df, aes(x = year, y = percent_biology)) +
+#create violin plot
+violin_plot_16v18v20 <- ggplot(percent_biology_df, aes(x = year, y = percent_biology, fill = year, alpha =0.05)) +
   geom_violin() +
-  coord_flip()
+  stat_summary(fun = median, geom="point", size=2, aes(color=paste("median", year))) +
+  labs(title = "Proportion of Biology Students by Year")+
+  ylab("Proportion Biology")+
+  xlab("Year") +
+  coord_flip() +
+  theme(legend.position = "none",
+        panel.background = element_blank(),
+        axis.line = element_line(color = "black"),
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
+#add vertical line to violin plot
+violin_plot_16v18v20 +
+  geom_hline(yintercept = median(proportion_of_biology_2018$percent_biology), size = 0.5, color="darkgreen", linetype = "dashed")+
+  scale_y_continuous(limits=c(0,1.03), expand=c(0,0))
