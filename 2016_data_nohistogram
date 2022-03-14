@@ -1,0 +1,31 @@
+#import data
+school_data_2016 <- read_csv("C:/Users/otool/OneDrive - University of Connecticut/Desktop/school_data_2016.csv", col_types = cols(UNITID = col_factor(levels = NULL), CIPCODE = col_factor(levels = NULL)))
+
+#select total
+school_data_unit_cip_2016 <- school_data_2016 %>% select(UNITID, CIPCODE, EFTOTLT)
+
+#find sum of students by school
+total_enrollment_2016 <- school_data_unit_cip_2016 %>%
+  group_by(UNITID) %>%
+  summarise(Freq = sum(EFTOTLT))
+
+#find total biology enrollment by school
+total_biol_enrollment_2016 <- school_data_unit_cip_2016 %>%
+  group_by(UNITID) %>%
+  filter(CIPCODE == "26") %>%
+  summarise(Freq = sum(EFTOTLT))
+
+#find total enrollment for schools that have biology students
+schools_with_biology_2016 <- total_biol_enrollment_2016[ , 1]
+
+total_enrollment_schools_with_biology_2016 <- filter(total_enrollment_2016, UNITID %in% schools_with_biology_2016$UNITID)
+
+#create table for total and biology
+proportion_of_biology_2016 <- left_join(x = total_enrollment_schools_with_biology_2016, y = total_biol_enrollment_2016, by = "UNITID")
+
+#create new column for proportion
+proportion_of_biology_2016 <- proportion_of_biology_2016 %>%
+  mutate(prop_biology_2016 = Freq.y/Freq.x)
+
+#central tendencies of biology proportions
+summary(proportion_of_biology_2016$prop_biology_2016)
