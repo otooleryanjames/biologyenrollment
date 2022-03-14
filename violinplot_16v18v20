@@ -42,4 +42,8 @@ violin_plot_16v18v20 <- ggplot(percent_biology_df, aes(x = year, y = percent_bio
 #add vertical line to violin plot
 violin_plot_16v18v20 +
   geom_hline(yintercept = median(proportion_of_biology_2018$percent_biology), size = 0.5, color="darkgreen", linetype = "dashed")+
-  scale_y_continuous(limits=c(0,1.03), expand=c(0,0))
+  scale_y_continuous(limits=c(0,1.03), expand=c(0,0)) +
+  annotate("text", x = 0.75, y = 0.6, label = "2016 Median = 0.173")+
+  annotate("text", x = 1.75, y = 0.6, label = "2018 Median = 0.179")+
+  annotate("text", x = 2.75, y = 0.6, label = "2020 Median = 0.181")
+  
