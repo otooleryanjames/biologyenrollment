@@ -1,0 +1,29 @@
+#create a side-by-side boxplot, need common variable name(prop_biology) and a new column for year
+glimpse(proportion_of_biology)
+glimpse(proportion_of_biology_2018)
+glimpse(proportion_of_biology_2016)
+
+#rename column to percent biology
+proportion_of_biology <- rename(proportion_of_biology, percent_biology = prop_biology)
+proportion_of_biology_2018 <- rename(proportion_of_biology_2018, percent_biology = prop_biology_2018)
+proportion_of_biology_2016 <- rename(proportion_of_biology_2016, percent_biology = prop_biology_2016)
+
+#add year factor to each df
+proportion_of_biology$year <- "2020"
+proportion_of_biology_2018$year <- "2018"
+proportion_of_biology_2016$year <- "2016"
+
+#remove frequency columns
+proportion_of_biology <- select(proportion_of_biology, -Freq.x, -Freq.y)
+proportion_of_biology_2018 <- select(proportion_of_biology_2018, -Freq.x, -Freq.y)
+proportion_of_biology_2016 <- select(proportion_of_biology_2016, -Freq.x, -Freq.y)
+
+#combine frames into one
+percent_biology_df <- rbind(proportion_of_biology, proportion_of_biology_2018, proportion_of_biology_2016)
+
+#convert year into factor
+percent_biology_df$year <- as.factor(percent_biology_df$year)
+
+ggplot(percent_biology_df, aes(x = year, y = percent_biology)) +
+  geom_violin() +
+  coord_flip()
