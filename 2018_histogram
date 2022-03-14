@@ -1,0 +1,57 @@
+#load packages
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(readr)
+library(data.table)
+
+#import data
+school_data_2018 <- read_csv("C:/Users/otool/OneDrive - University of Connecticut/Desktop/school_data_2018.csv", col_types = cols(UNITID = col_factor(levels = NULL), CIPCODE = col_factor(levels = NULL)))
+
+#select total
+school_data_unit_cip_2018 <- school_data_2018 %>% select(UNITID, CIPCODE, EFTOTLT)
+
+#find sum of students by school
+total_enrollment_2018 <- school_data_unit_cip_2018 %>%
+  group_by(UNITID) %>%
+  summarise(Freq = sum(EFTOTLT))
+
+#find total biology enrollment by school
+total_biol_enrollment_2018 <- school_data_unit_cip_2018 %>%
+  group_by(UNITID) %>%
+  filter(CIPCODE == "26") %>%
+  summarise(Freq = sum(EFTOTLT))
+
+#find total enrollment for schools that have biology students
+schools_with_biology_2018 <- total_biol_enrollment_2018[ , 1]
+
+total_enrollment_schools_with_biology_2018 <- filter(total_enrollment_2018, UNITID %in% schools_with_biology_2018$UNITID)
+
+#create table for total and biology
+proportion_of_biology_2018 <- left_join(x = total_enrollment_schools_with_biology_2018, y = total_biol_enrollment_2018, by = "UNITID")
+
+#create new column for proportion
+proportion_of_biology_2018 <- proportion_of_biology_2018 %>%
+  mutate(prop_biology_2018 = Freq.y/Freq.x)
+
+#central tendencies of biology proportions
+summary(proportion_of_biology_2018$prop_biology_2018)
+
+#Plot a histogram
+biology_proportion_histogram_2018 <- ggplot(proportion_of_biology_2018, aes(x = prop_biology_2018)) +
+  geom_histogram(binwidth = 0.03, color = "#000000", fill = "#E06238", alpha = 0.2)+
+  scale_y_continuous(limits = c(0,210), expand = c(0,0))+
+  labs(title = "Number of Schools by Proportion of Biology Students in 2018")+
+  ylab("Number of Schools")+
+  xlab("Proportion of Students Enrolled in Biology")
+
+histogram_2018 <- biology_proportion_histogram_2018 +
+  geom_vline(aes(xintercept = median(prop_biology_2018)), color = "#000000", size = 1.25)+
+  geom_vline(aes(xintercept = 0.118499), color = "#000000", size = 1, linetype = "dashed")+
+  geom_vline(aes(xintercept = 0.276708), color = "#000000", size = 1, linetype = "dashed")+
+  theme(panel.background = element_blank(),
+        axis.line = element_line(color = "black"),
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
