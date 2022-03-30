@@ -1,0 +1,61 @@
+#load packages
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(readr)
+library(data.table)
+
+#import data
+school_data <- read_csv("C:/Users/otool/OneDrive - University of Connecticut/Desktop/school_data.csv", col_types = cols(UNITID = col_factor(levels = NULL), CIPCODE = col_factor(levels = NULL)))
+
+#glimpse at data
+glimpse(school_data)
+
+#select total
+school_data_unit_cip <- school_data %>% select(UNITID, CIPCODE, EFTOTLT)
+
+#find sum of students by school
+total_enrollment <- school_data_unit_cip %>%
+  group_by(UNITID) %>%
+  summarise(Freq = sum(EFTOTLT))
+
+#find total biology enrollment by school
+total_biol_enrollment <- school_data_unit_cip %>%
+  group_by(UNITID) %>%
+  filter(CIPCODE == "26") %>%
+  summarise(Freq = sum(EFTOTLT))
+
+#find total enrollment for schools that have biology students
+schools_with_biology <- total_biol_enrollment[ , 1]
+
+total_enrollment_schools_with_biology <- filter(total_enrollment, UNITID %in% schools_with_biology$UNITID)
+
+#create table for total and biology
+proportion_of_biology <- left_join(x = total_enrollment_schools_with_biology, y = total_biol_enrollment, by = "UNITID")
+
+#create new column for proportion
+proportion_of_biology <- proportion_of_biology %>%
+  mutate(prop_biology = Freq.y/Freq.x)
+
+#central tendencies of biology proportions
+summary(proportion_of_biology$prop_biology)
+
+#Plot a histogram
+biology_proportion_histogram <- ggplot(proportion_of_biology, aes(x = percent_biology)) +
+  geom_histogram(binwidth = 0.03, color = "#000000", fill = "#0099F8")+
+  scale_y_continuous(limits = c(0,210), expand = c(0,0))+
+  labs(title = "Number of Schools by Proportion of Biology Students in 2020")+
+  ylab("Number of Schools")+
+  xlab("Proportion of Students Enrolled in Biology")
+
+biology_proportion_histogram +
+  geom_vline(aes(xintercept = median(percent_biology)), color = "#000000", size = 1.25)+
+  geom_vline(aes(xintercept = 0.120064), color = "#000000", size = 1, linetype = "dashed")+
+  geom_vline(aes(xintercept = 0.266919), color = "#000000", size = 1, linetype = "dashed")+
+  theme(panel.background = element_blank(),
+        axis.line = element_line(color = "black"),
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
+
